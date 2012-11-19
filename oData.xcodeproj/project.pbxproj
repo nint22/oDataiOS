@@ -1,0 +1,285 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		06689CEF1659F452005EA75A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06689CEE1659F452005EA75A /* UIKit.framework */; };
+		06689CF11659F452005EA75A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06689CF01659F452005EA75A /* Foundation.framework */; };
+		06689CF31659F452005EA75A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06689CF21659F452005EA75A /* CoreGraphics.framework */; };
+		06689CF91659F452005EA75A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 06689CF71659F452005EA75A /* InfoPlist.strings */; };
+		06689CFB1659F452005EA75A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 06689CFA1659F452005EA75A /* main.m */; };
+		06689CFF1659F452005EA75A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 06689CFE1659F452005EA75A /* AppDelegate.m */; };
+		068976781659F77700649B9C /* oDataInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 068976771659F77700649B9C /* oDataInterface.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		06689CEA1659F452005EA75A /* oData.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = oData.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		06689CEE1659F452005EA75A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		06689CF01659F452005EA75A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		06689CF21659F452005EA75A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		06689CF61659F452005EA75A /* oData-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "oData-Info.plist"; sourceTree = "<group>"; };
+		06689CF81659F452005EA75A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		06689CFA1659F452005EA75A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		06689CFC1659F452005EA75A /* oData-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "oData-Prefix.pch"; sourceTree = "<group>"; };
+		06689CFD1659F452005EA75A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		06689CFE1659F452005EA75A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		068976761659F77700649B9C /* oDataInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = oDataInterface.h; sourceTree = "<group>"; };
+		068976771659F77700649B9C /* oDataInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = oDataInterface.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		06689CE71659F452005EA75A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06689CEF1659F452005EA75A /* UIKit.framework in Frameworks */,
+				06689CF11659F452005EA75A /* Foundation.framework in Frameworks */,
+				06689CF31659F452005EA75A /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		06689CDF1659F452005EA75A = {
+			isa = PBXGroup;
+			children = (
+				068976741659F72000649B9C /* Core */,
+				06689CF41659F452005EA75A /* oData */,
+				06689CED1659F452005EA75A /* Frameworks */,
+				06689CEB1659F452005EA75A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		06689CEB1659F452005EA75A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				06689CEA1659F452005EA75A /* oData.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		06689CED1659F452005EA75A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				06689CEE1659F452005EA75A /* UIKit.framework */,
+				06689CF01659F452005EA75A /* Foundation.framework */,
+				06689CF21659F452005EA75A /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		06689CF41659F452005EA75A /* oData */ = {
+			isa = PBXGroup;
+			children = (
+				06689CFD1659F452005EA75A /* AppDelegate.h */,
+				06689CFE1659F452005EA75A /* AppDelegate.m */,
+				06689CF51659F452005EA75A /* Supporting Files */,
+			);
+			path = oData;
+			sourceTree = "<group>";
+		};
+		06689CF51659F452005EA75A /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				06689CF61659F452005EA75A /* oData-Info.plist */,
+				06689CF71659F452005EA75A /* InfoPlist.strings */,
+				06689CFA1659F452005EA75A /* main.m */,
+				06689CFC1659F452005EA75A /* oData-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		068976741659F72000649B9C /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				068976761659F77700649B9C /* oDataInterface.h */,
+				068976771659F77700649B9C /* oDataInterface.m */,
+			);
+			name = Core;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		06689CE91659F452005EA75A /* oData */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 06689D021659F452005EA75A /* Build configuration list for PBXNativeTarget "oData" */;
+			buildPhases = (
+				06689CE61659F452005EA75A /* Sources */,
+				06689CE71659F452005EA75A /* Frameworks */,
+				06689CE81659F452005EA75A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = oData;
+			productName = oData;
+			productReference = 06689CEA1659F452005EA75A /* oData.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		06689CE11659F452005EA75A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0440;
+				ORGANIZATIONNAME = "Jeremy Bridon";
+			};
+			buildConfigurationList = 06689CE41659F452005EA75A /* Build configuration list for PBXProject "oData" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 06689CDF1659F452005EA75A;
+			productRefGroup = 06689CEB1659F452005EA75A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				06689CE91659F452005EA75A /* oData */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		06689CE81659F452005EA75A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06689CF91659F452005EA75A /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		06689CE61659F452005EA75A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				06689CFB1659F452005EA75A /* main.m in Sources */,
+				06689CFF1659F452005EA75A /* AppDelegate.m in Sources */,
+				068976781659F77700649B9C /* oDataInterface.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		06689CF71659F452005EA75A /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				06689CF81659F452005EA75A /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		06689D001659F452005EA75A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		06689D011659F452005EA75A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		06689D031659F452005EA75A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "oData/oData-Prefix.pch";
+				INFOPLIST_FILE = "oData/oData-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		06689D041659F452005EA75A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "oData/oData-Prefix.pch";
+				INFOPLIST_FILE = "oData/oData-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		06689CE41659F452005EA75A /* Build configuration list for PBXProject "oData" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06689D001659F452005EA75A /* Debug */,
+				06689D011659F452005EA75A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		06689D021659F452005EA75A /* Build configuration list for PBXNativeTarget "oData" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06689D031659F452005EA75A /* Debug */,
+				06689D041659F452005EA75A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 06689CE11659F452005EA75A /* Project object */;
+}
