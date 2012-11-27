@@ -14,6 +14,8 @@
 		06689CFB1659F452005EA75A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 06689CFA1659F452005EA75A /* main.m */; };
 		06689CFF1659F452005EA75A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 06689CFE1659F452005EA75A /* AppDelegate.m */; };
 		068976781659F77700649B9C /* oDataInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 068976771659F77700649B9C /* oDataInterface.m */; };
+		06C689BB165F00FF004838C2 /* oDataParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 06C689BA165F00FF004838C2 /* oDataParser.m */; };
+		06C689C716644340004838C2 /* ODataRequestResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 06C689C616644340004838C2 /* ODataRequestResult.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +31,10 @@
 		06689CFE1659F452005EA75A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		068976761659F77700649B9C /* oDataInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = oDataInterface.h; sourceTree = "<group>"; };
 		068976771659F77700649B9C /* oDataInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = oDataInterface.m; sourceTree = "<group>"; };
+		06C689B9165F00FF004838C2 /* oDataParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = oDataParser.h; sourceTree = "<group>"; };
+		06C689BA165F00FF004838C2 /* oDataParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = oDataParser.m; sourceTree = "<group>"; };
+		06C689C516644340004838C2 /* ODataRequestResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ODataRequestResult.h; sourceTree = "<group>"; };
+		06C689C616644340004838C2 /* ODataRequestResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ODataRequestResult.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +105,10 @@
 			children = (
 				068976761659F77700649B9C /* oDataInterface.h */,
 				068976771659F77700649B9C /* oDataInterface.m */,
+				06C689B9165F00FF004838C2 /* oDataParser.h */,
+				06C689BA165F00FF004838C2 /* oDataParser.m */,
+				06C689C516644340004838C2 /* ODataRequestResult.h */,
+				06C689C616644340004838C2 /* ODataRequestResult.m */,
 			);
 			name = Core;
 			sourceTree = "<group>";
@@ -168,6 +178,8 @@
 				06689CFB1659F452005EA75A /* main.m in Sources */,
 				06689CFF1659F452005EA75A /* AppDelegate.m in Sources */,
 				068976781659F77700649B9C /* oDataInterface.m in Sources */,
+				06C689BB165F00FF004838C2 /* oDataParser.m in Sources */,
+				06C689C716644340004838C2 /* ODataRequestResult.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
