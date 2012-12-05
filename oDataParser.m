@@ -25,4 +25,31 @@
     return self;
 }
 
+-(NSDictionary*)GetEntities
+{
+    return nil;
+}
+
+/*** NSXMLParserDelegate Implementation ***/
+
+- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
+{
+    // Todo...
+}
+
+- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
+{
+    // Todo...
+}
+
+- (void)parser:(NSXMLParser *)parser foundCDATA:(NSData *)CDATABlock
+{
+    // Todo...
+}
+
+- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
+{
+    // Todo...
+}
+
 @end

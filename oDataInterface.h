@@ -27,7 +27,16 @@ typedef enum __oDataInterfaceExecType {
     oDataInterfaceExecType_Delete,  // Delete
 } oDataInterfaceExecType;
 
-/*** Class Prototype ***/
+/*** Special Structure for all Queries ***/
+
+// Internal private class
+@interface __oDataQuery : NSObject
+    @property (atomic, readwrite) oDataInterfaceExecType ExecType;
+    @property (atomic, readwrite) NSURL* FullURL;
+    @property (atomic, readwrite) NSDictionary* QueryData;
+@end
+
+/*** Main Class Prototype ***/
 
 @interface oDataInterface : NSObject < NSURLConnectionDelegate >
 {
@@ -37,7 +46,13 @@ typedef enum __oDataInterfaceExecType {
     NSURL* ServerURL;
     
     // Service path (such as OData.svc)
-    NSString* ServiceURL;
+    NSString* ServiceName;
+    
+    /*** Promises & Futures ***/
+    
+    // Queue of all promisies we will fulfill when the end-user tells us to
+    // Is an array of "__oDataQuery" objects
+    NSMutableArray* FuturesQueue;
     
     /*** Internal State Machine ***/
     
@@ -61,6 +76,9 @@ typedef enum __oDataInterfaceExecType {
 // Set the service (.svc) we will be executing upon (can be changed at any point)
 -(void)SetService:(NSString*)Service;
 
+// Get the full URL formed by the current state of this interface
+-(NSURL*)GetFullURL;
+
 /*** Single Executions ***/
 
 // Execute the current string formed (not the one on the promise queue)
@@ -68,7 +86,7 @@ typedef enum __oDataInterfaceExecType {
 -(NSDictionary*)Execute:(NSError**)ErrorOut;
 
 // Execute with a callback block
-// Will not
+// Will not block, since the CompletionHandler function block is executed upon completion
 -(void)ExecuteAsync:(void (^)(NSDictionary*, NSError*))CompletionHandler;
 
 /*** Futures & Promises Methods ***/
@@ -80,8 +98,12 @@ typedef enum __oDataInterfaceExecType {
 -(void)PushPromise;
 
 // Execute all queued promises and return their results in the
-// order that the query strings were formed
--(NSArray*)ExecutePromises;
+// order that the query strings were formed (blocking call)
+-(NSArray*)ExecutePromises:(NSError**)ErrorOut;
+
+// Execute all queued promises and return their results in the
+// order that the query strings were formed (non-blocking)
+-(void)ExecutePromisesAsync:(void (^)(NSArray*, NSError*))CompletionHandler;
 
 /*** Query Data (GET) ***/
 
@@ -120,5 +142,14 @@ typedef enum __oDataInterfaceExecType {
 
 // Delete a given entry
 -(void)DeleteEntry:(NSDictionary*)ExistingEntry;
+
+/*** Special Execution (Functions that return OData info) ***/
+
+// Execute the given string against the set server and service
+// This is a blocking call; use the async version for non-block
+-(NSDictionary*)ExecuteFuncString:(NSString*)FuncString WithError:(NSError**)ErrorOut;
+
+// Non-blocking async. version of the string execution function
+-(void)ExecuteFuncStringAsync:(NSString*)FuncString WithCompletionBlock:(void (^)(NSDictionary*, NSError*))CompletionHandler;
 
 @end

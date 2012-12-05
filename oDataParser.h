@@ -15,7 +15,7 @@
 
 // Helpful error macro for returning a new NSError
 #ifndef NSErrorCreate
-    #define NSErrorCreate(msg) [NSError errorWithDomain:@"world" code:200 userInfo:[NSDictionary dictionaryWithObject:(msg) forKey:NSLocalizedDescriptionKey]];
+    #define NSErrorCreate(msg) [NSError errorWithDomain:@"world" code:200 userInfo:[NSDictionary dictionaryWithObject:(msg) forKey:NSLocalizedDescriptionKey]]
 #endif
 
 
@@ -23,5 +23,8 @@
 
 // Init with XML-string data (i.e. HTTP result)
 -(id) initWithData:(NSData*)Data;
+
+// Return the parsed data; on error, return nil, otherwise at minimum an empty dictionary is built
+-(NSDictionary*)GetEntities;
 
 @end
