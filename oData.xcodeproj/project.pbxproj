@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		062206A01670131100EA9C34 /* ConsoleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0622069E1670131100EA9C34 /* ConsoleViewController.m */; };
+		062206A11670131100EA9C34 /* ConsoleViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0622069F1670131100EA9C34 /* ConsoleViewController.xib */; };
+		062206A316702FB600EA9C34 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 062206A216702FB600EA9C34 /* Icon.png */; };
+		062206A516702FD300EA9C34 /* Icon2.png in Resources */ = {isa = PBXBuildFile; fileRef = 062206A416702FD200EA9C34 /* Icon2.png */; };
 		06689CEF1659F452005EA75A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06689CEE1659F452005EA75A /* UIKit.framework */; };
 		06689CF11659F452005EA75A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06689CF01659F452005EA75A /* Foundation.framework */; };
 		06689CF31659F452005EA75A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06689CF21659F452005EA75A /* CoreGraphics.framework */; };
@@ -19,6 +23,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0622069D1670131100EA9C34 /* ConsoleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConsoleViewController.h; sourceTree = "<group>"; };
+		0622069E1670131100EA9C34 /* ConsoleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConsoleViewController.m; sourceTree = "<group>"; };
+		0622069F1670131100EA9C34 /* ConsoleViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ConsoleViewController.xib; sourceTree = "<group>"; };
+		062206A216702FB600EA9C34 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icon.png; sourceTree = "<group>"; };
+		062206A416702FD200EA9C34 /* Icon2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon2.png; path = ../Icon2.png; sourceTree = "<group>"; };
 		06689CEA1659F452005EA75A /* oData.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = oData.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		06689CEE1659F452005EA75A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		06689CF01659F452005EA75A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -82,6 +91,9 @@
 		06689CF41659F452005EA75A /* oData */ = {
 			isa = PBXGroup;
 			children = (
+				0622069D1670131100EA9C34 /* ConsoleViewController.h */,
+				0622069E1670131100EA9C34 /* ConsoleViewController.m */,
+				0622069F1670131100EA9C34 /* ConsoleViewController.xib */,
 				06689CFD1659F452005EA75A /* AppDelegate.h */,
 				06689CFE1659F452005EA75A /* AppDelegate.m */,
 				06689CF51659F452005EA75A /* Supporting Files */,
@@ -92,6 +104,8 @@
 		06689CF51659F452005EA75A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				062206A416702FD200EA9C34 /* Icon2.png */,
+				062206A216702FB600EA9C34 /* Icon.png */,
 				06689CF61659F452005EA75A /* oData-Info.plist */,
 				06689CF71659F452005EA75A /* InfoPlist.strings */,
 				06689CFA1659F452005EA75A /* main.m */,
@@ -165,6 +179,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				06689CF91659F452005EA75A /* InfoPlist.strings in Resources */,
+				062206A11670131100EA9C34 /* ConsoleViewController.xib in Resources */,
+				062206A316702FB600EA9C34 /* Icon.png in Resources */,
+				062206A516702FD300EA9C34 /* Icon2.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,6 +197,7 @@
 				068976781659F77700649B9C /* oDataInterface.m in Sources */,
 				06C689BB165F00FF004838C2 /* oDataParser.m in Sources */,
 				06C689C716644340004838C2 /* ODataRequestResult.m in Sources */,
+				062206A01670131100EA9C34 /* ConsoleViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

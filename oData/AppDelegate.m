@@ -10,11 +10,21 @@
 
 @implementation AppDelegate
 
+@synthesize ConsoleView;
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
+    
+    // Add text field so we can post our texting results
+    ConsoleView = [[ConsoleViewController alloc] initWithNibName:@"ConsoleViewController" bundle:nil];
+    [[ConsoleView view] setFrame:[[UIScreen mainScreen] applicationFrame]];
+    
+    [self.window addSubview:[ConsoleView view]];
+    
     [self.window makeKeyAndVisible];
     return YES;
 }

@@ -34,6 +34,7 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
         // Save URLs
         ServerURL = _ServerURL;
         ServiceName = _Service;
+        CollectionString = nil;
         
         // Clean state machine
         [self ClearStates];
@@ -65,7 +66,7 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     switch(ExecType)
     {
         // TODO: implement the rest...
-        case oDataInterfaceExecType_Get: FullURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", ServiceName, QueryString] relativeToURL:ServerURL];
+        case oDataInterfaceExecType_Get: FullURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@%@", [ServerURL absoluteString], ServiceName, CollectionString, QueryString ? QueryString : @""]];
         case oDataInterfaceExecType_Post:
         case oDataInterfaceExecType_Put:
         case oDataInterfaceExecType_Delete:
@@ -187,6 +188,11 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     }];
 }
 
+-(void)SetCollection:(NSString*)Collection
+{
+    CollectionString = Collection;
+}
+
 -(void)AddOrderBy:(NSString*)Option
 {
     [self QueryStringAppend:[NSString stringWithFormat:@"$orderBy=%@", Option]];
@@ -266,10 +272,11 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
 -(void)ClearStates
 {
     // Reset query / exec type
-    ExecType = oDataInterfaceExecType_None;
+    ExecType = oDataInterfaceExecType_Get;
     
     // Reset strings
     QueryString = nil;
+    CollectionString = nil;
 }
 
 -(void)QueryStringAppend:(NSString*)ToAppend
@@ -289,26 +296,18 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     // Reset error
     *ErrorOut = nil;
     
-    // Ignore if no query set
-    if(StateType == oDataInterfaceExecType_None)
-    {
-        *ErrorOut = NSErrorCreate(@"No query formed to execute");
-        return nil;
-    }
-    
     // Form the appropriate URL get / post / etc...
     NSMutableURLRequest* Request = [[NSMutableURLRequest alloc] init];
     
     // Set the query / exec string
     switch(StateType) {
-        case oDataInterfaceExecType_Get: [Request setHTTPMethod:@"GET"];
-        case oDataInterfaceExecType_Post: [Request setHTTPMethod:@"POST"];
-        case oDataInterfaceExecType_Put: [Request setHTTPMethod:@"PUT"];
-        case oDataInterfaceExecType_Delete: [Request setHTTPMethod:@"DELETE"];
+        case oDataInterfaceExecType_Get: [Request setHTTPMethod:@"GET"]; break;
+        case oDataInterfaceExecType_Post: [Request setHTTPMethod:@"POST"]; break;
+        case oDataInterfaceExecType_Put: [Request setHTTPMethod:@"PUT"]; break;
+        case oDataInterfaceExecType_Delete: [Request setHTTPMethod:@"DELETE"]; break;
         
         // Error out:
         default:
-        case oDataInterfaceExecType_None:
         {
             *ErrorOut = NSErrorCreate(@"No known HTTP header type to use");
             return nil;
@@ -340,7 +339,7 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     // On no result generated, error out
     if(Result == nil)
     {
-        *ErrorOut = NSErrorCreate(@"No known oData action to use");
+        *ErrorOut = NSErrorCreate(@"Unable to form connection");
         return nil;
     }
     
@@ -362,7 +361,11 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     }
     
     // All done!
-    return [Parser GetEntities];
+    NSDictionary* ParsedData = [Parser GetEntities];
+    if(ParsedData == nil)
+        *ErrorOut = NSErrorCreate(@"Unable to form the returned data");
+    
+    return ParsedData;
 }
 
 @end

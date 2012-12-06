@@ -20,8 +20,7 @@
 
 // All possible URL actions
 typedef enum __oDataInterfaceExecType {
-    oDataInterfaceExecType_None,    // Not yet set
-    oDataInterfaceExecType_Get,     // Query
+    oDataInterfaceExecType_Get,     // Query (default)
     oDataInterfaceExecType_Post,    // Insert
     oDataInterfaceExecType_Put,     // Update
     oDataInterfaceExecType_Delete,  // Delete
@@ -58,6 +57,9 @@ typedef enum __oDataInterfaceExecType {
     
     // Current command type (query, insert, etc...)
     oDataInterfaceExecType ExecType;
+    
+    // Current table (collection)
+    NSString* CollectionString;
     
     // Current query strings
     NSString* QueryString;
@@ -106,6 +108,9 @@ typedef enum __oDataInterfaceExecType {
 -(void)ExecutePromisesAsync:(void (^)(NSArray*, NSError*))CompletionHandler;
 
 /*** Query Data (GET) ***/
+
+// Set the table (collection) we are working with
+-(void)SetCollection:(NSString*)Collection;
 
 // Apply a "$orderBy" filter option
 -(void)AddOrderBy:(NSString*)Option;

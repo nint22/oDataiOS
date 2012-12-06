@@ -7,9 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ConsoleViewController.h"
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+@property (nonatomic, readwrite) ConsoleViewController* ConsoleView;
 
 @end
