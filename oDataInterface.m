@@ -14,27 +14,28 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
 /*** Internal Structures ***/
 
 @implementation __oDataQuery
-    @synthesize ExecType, FullURL, QueryData;
+    @synthesize ServerURL, ServiceName, DatabaseName, ExecType, CollectionName, QueryString, QueryEntryName, QueryEntry;
 @end
 
 @implementation oDataInterface
 
 /*** Public ***/
 
--(id)initInterfaceForServer:(NSURL*)_ServerURL
+-(id)initInterfaceForServer:(NSURL*)_ServerURL andDatabase:(NSString*)_Database
 {
-    return [self initInterfaceForServer:_ServerURL onService:nil];
+    return [self initInterfaceForServer:_ServerURL onService:nil andDatabase:_Database];
 }
 
--(id)initInterfaceForServer:(NSURL*)_ServerURL onService:(NSString*)_Service
+-(id)initInterfaceForServer:(NSURL*)_ServerURL onService:(NSString*)_Service andDatabase:(NSString*)_Database
 {
     // The true constructor for this entire class
     if((self = [super init]) != nil)
     {
-        // Save URLs
-        ServerURL = _ServerURL;
-        ServiceName = _Service;
-        CollectionString = nil;
+        // Init and save base data
+        ActiveQuery = [[__oDataQuery alloc] init];
+        [ActiveQuery setServerURL:_ServerURL];
+        [ActiveQuery setServiceName:_Service];
+        [ActiveQuery setDatabaseName:_Database];
         
         // Clean state machine
         [self ClearStates];
@@ -42,19 +43,14 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     return self;
 }
 
-+(id)oDataInterfaceForServer:(NSURL*)_ServerURL
++(id)oDataInterfaceForServer:(NSURL*)_ServerURL andDatabase:(NSString*)_Database
 {
-    return [[oDataInterface alloc] initInterfaceForServer:_ServerURL];
+    return [[oDataInterface alloc] initInterfaceForServer:_ServerURL andDatabase:_Database];
 }
 
-+(id)oDataInterfaceForServer:(NSURL*)_ServerURL onService:(NSString*)_Service
++(id)oDataInterfaceForServer:(NSURL*)_ServerURL onService:(NSString*)_Service andDatabase:(NSString*)_Database
 {
-    return [[oDataInterface alloc] initInterfaceForServer:_ServerURL onService:_Service];
-}
-
--(void)SetService:(NSString*)_Service
-{
-    ServiceName = _Service;
+    return [[oDataInterface alloc] initInterfaceForServer:_ServerURL onService:_Service andDatabase:_Database];
 }
 
 -(NSURL*)GetFullURL
@@ -63,13 +59,18 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     NSURL* FullURL = nil;
     
     // Switch based on current state
-    switch(ExecType)
+    switch([ActiveQuery ExecType])
     {
-        // TODO: implement the rest...
-        case oDataInterfaceExecType_Get: FullURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@%@", [ServerURL absoluteString], ServiceName, CollectionString, QueryString ? QueryString : @""]];
+        case oDataInterfaceExecType_Get:
+            FullURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@%@", [[ActiveQuery ServerURL] absoluteString], [ActiveQuery ServiceName], [ActiveQuery CollectionName], [ActiveQuery QueryString] ? [NSString stringWithFormat:@"?%@", [ActiveQuery QueryString]] : @""]];
+            break;
         case oDataInterfaceExecType_Post:
         case oDataInterfaceExecType_Put:
+            FullURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@", [[ActiveQuery ServerURL] absoluteString], [ActiveQuery ServiceName], [ActiveQuery CollectionName]]];
+            break;
         case oDataInterfaceExecType_Delete:
+            // todo.. implement the delete overhead structures
+            break;
         default:
             break;
     }
@@ -77,11 +78,11 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     return FullURL;
 }
 
--(NSDictionary*)Execute:(NSError**)ErrorOut
+-(NSArray*)Execute:(NSError**)ErrorOut
 {
     // Form the appropriate URL
     NSURL* FullURL = [self GetFullURL];
-    NSDictionary* Result = nil;
+    NSArray* Result = nil;
     
     // If not correctly formed, error out
     if(FullURL == nil)
@@ -89,23 +90,16 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     
     // Else, all good!
     else
-        Result = [oDataInterface ExecuteWithState:ExecType OnURL:FullURL WithData:nil OnError:ErrorOut];
+        Result = [oDataInterface ExecuteQuery:ActiveQuery OnError:ErrorOut];
     
     // Done
     return Result;
 }
 
--(void)ExecuteAsync:(void (^)(NSDictionary*, NSError*))CompletionHandler
+-(void)ExecuteAsync:(void (^)(NSArray*, NSError*))CompletionHandler
 {
     // Copy our current state
-    __oDataQuery* Query = [[__oDataQuery alloc] init];
-    [Query setExecType:ExecType];
-    
-    // Todo: copy over any data for the commanb
-    [Query setQueryData:nil];
-    
-    // Save full URL
-    [Query setFullURL:[self GetFullURL]];
+    __oDataQuery* Query = [ActiveQuery copy];
     
     // Parallel execution (async)
     NSOperationQueue* Queue = [[NSOperationQueue alloc] init];
@@ -113,7 +107,7 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
         
         // Execute and have the result posted to the completion handler
         NSError* Error = nil;
-        NSDictionary* Results = [oDataInterface ExecuteWithState:[Query ExecType] OnURL:[Query FullURL] WithData:[Query QueryData] OnError:&Error];
+        NSArray* Results = [oDataInterface ExecuteQuery:Query OnError:&Error];
         
         // Post results
         CompletionHandler(Results, Error);
@@ -129,10 +123,7 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
 -(void)PushPromise
 {
     // Copy over our state
-    __oDataQuery* Promise = [[__oDataQuery alloc] init];
-    [Promise setExecType:ExecType];
-    [Promise setFullURL:[self GetFullURL]];
-    [Promise setQueryData:nil]; // TODO: get data struct pasted...
+    __oDataQuery* Promise = [ActiveQuery copy];
     
     // Save promise as a structure and clear the current state
     [FuturesQueue addObject:Promise];
@@ -157,7 +148,7 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
             
             // Execute and have the result posted to the completion handler
             NSError* Error = nil;
-            NSDictionary* Results = [oDataInterface ExecuteWithState:[Query ExecType] OnURL:[Query FullURL] WithData:[Query QueryData] OnError:&Error];
+            NSArray* Results = [oDataInterface ExecuteQuery:Query OnError:&Error];
             
             // Push back into results array (not sure if we need some sort of lock?)
             [ResultsArray addObject:Results];
@@ -173,8 +164,6 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
 
 -(void)ExecutePromisesAsync:(void (^)(NSArray*, NSError*))CompletionHandler
 {
-    // Todo: what about the user manipulating the promises array during execution?
-    
     // Put all in the background
     NSOperationQueue* Queue = [[NSOperationQueue alloc] init];
     [Queue addOperationWithBlock:^{
@@ -190,7 +179,7 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
 
 -(void)SetCollection:(NSString*)Collection
 {
-    CollectionString = Collection;
+    [ActiveQuery setCollectionName: Collection];
 }
 
 -(void)AddOrderBy:(NSString*)Option
@@ -228,29 +217,35 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     [self QueryStringAppend:[NSString stringWithFormat:@"$inlinecount=%@", Option]];
 }
 
--(void)AddEntry:(NSDictionary*)NewEntry
+-(void)AddEntry:(NSString*)Entry withData:(NSDictionary*)NewEntry
+{
+    // Register this as an execution operation
+    [ActiveQuery setExecType: oDataInterfaceExecType_Post];
+    [ActiveQuery setQueryString:[NSString stringWithFormat:@"%@/%@", [ActiveQuery ServiceName], [ActiveQuery CollectionName]]];
+    [ActiveQuery setQueryEntryName: Entry];
+    [ActiveQuery setQueryEntry: NewEntry];
+}
+
+-(void)UpdateEntry:(NSString*)Entry withData:(NSDictionary*)ExistingEntry
 {
     // TODO...
 }
 
--(void)UpdateEntry:(NSDictionary*)ExistingEntry
+-(void)DeleteEntry:(NSString*)Entry withData:(NSDictionary*)ExistingEntry
 {
     // TODO...
 }
 
--(void)DeleteEntry:(NSDictionary*)ExistingEntry
-{
-    // TODO...
-}
-
--(NSDictionary*)ExecuteFuncString:(NSString*)FuncString WithError:(NSError**)ErrorOut
+-(NSArray*)ExecuteFuncString:(NSString*)FuncString WithError:(NSError**)ErrorOut
 {
     // Just form the service URL with the function
-    return [oDataInterface ExecuteWithState:oDataInterfaceExecType_Get OnURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", ServiceName, FuncString] relativeToURL:ServerURL] WithData:nil OnError:ErrorOut];
+    // Todo..
+    [ActiveQuery setQueryString:[NSString stringWithFormat:@"%@/%@", [ActiveQuery ServiceName], FuncString]];
+    return [oDataInterface ExecuteQuery:ActiveQuery OnError:ErrorOut];
 }
 
 // Non-blocking async. version of the string execution function
--(void)ExecuteFuncStringAsync:(NSString*)FuncString WithCompletionBlock:(void (^)(NSDictionary*, NSError*))CompletionHandler
+-(void)ExecuteFuncStringAsync:(NSString*)FuncString WithCompletionBlock:(void (^)(NSArray*, NSError*))CompletionHandler
 {
     // Start a background thread and execute the regular function
     NSOperationQueue* BackgroundQueue = [[NSOperationQueue alloc] init];
@@ -260,7 +255,7 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
         NSError* Error = nil;
         
         // Simply execute the same work as the blocking method (but this runs in the background)
-        NSDictionary* Result = [self ExecuteFuncString:FuncString WithError:&Error];
+        NSArray* Result = [self ExecuteFuncString:FuncString WithError:&Error];
         
         // Pass result to block
         CompletionHandler(Result, Error);
@@ -271,27 +266,26 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
 
 -(void)ClearStates
 {
-    // Reset query / exec type
-    ExecType = oDataInterfaceExecType_Get;
-    
-    // Reset strings
-    QueryString = nil;
-    CollectionString = nil;
+    [ActiveQuery setExecType:oDataInterfaceExecType_Get];
+    [ActiveQuery setCollectionName:nil];
+    [ActiveQuery setQueryString:nil];
+    [ActiveQuery setQueryEntryName:nil];
+    [ActiveQuery setQueryEntry:nil];
 }
 
 -(void)QueryStringAppend:(NSString*)ToAppend
 {
     // Explicit alloc & copy
-    if(QueryString == nil)
-        QueryString = [NSString stringWithString:ToAppend];
+    if([ActiveQuery QueryString] == nil)
+        [ActiveQuery setQueryString:[NSString stringWithString:ToAppend]];
     
     // ... or just alloc & append
     else
-        QueryString = [NSString stringWithFormat:@"%@%@", QueryString, ToAppend];
+        [ActiveQuery setQueryString:[NSString stringWithFormat:@"%@%@", [ActiveQuery QueryString], ToAppend]];
 }
 
 // Generalized execution function; executes with the state and with a given string or data
-+(NSDictionary*)ExecuteWithState:(oDataInterfaceExecType)StateType OnURL:(NSURL*)FullURL WithData:(NSDictionary*)DataIn OnError:(NSError**)ErrorOut
++(NSArray*)ExecuteQuery:(__oDataQuery*)Query OnError:(NSError**)ErrorOut
 {
     // Reset error
     *ErrorOut = nil;
@@ -300,7 +294,7 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     NSMutableURLRequest* Request = [[NSMutableURLRequest alloc] init];
     
     // Set the query / exec string
-    switch(StateType) {
+    switch([Query ExecType]) {
         case oDataInterfaceExecType_Get: [Request setHTTPMethod:@"GET"]; break;
         case oDataInterfaceExecType_Post: [Request setHTTPMethod:@"POST"]; break;
         case oDataInterfaceExecType_Put: [Request setHTTPMethod:@"PUT"]; break;
@@ -318,19 +312,107 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     [Request setTimeoutInterval:__oDataInterface_TimeOut];
     
     // Set headers
-    [Request setValue:@"2.0" forHTTPHeaderField:@"DataServiceVersion"];
+    [Request setValue:@"1.0" forHTTPHeaderField:@"DataServiceVersion"];
     [Request setValue:@"2.0" forHTTPHeaderField:@"MaxDataServiceVersion"];
+    [Request setValue:@"application/atom+xml" forHTTPHeaderField:@"accept"];
+    
+    // Form query URL
+    [Request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", [[Query ServerURL] absoluteString], [Query QueryString]]]];
     
     // Prep for result
     ODataRequestResult* Result = nil;
     
     // Insert our query (or data)
-    if(StateType == oDataInterfaceExecType_Get)
+    if([Query ExecType] == oDataInterfaceExecType_Get)
     {
-        // Form query URL
-        [Request setURL:FullURL];
-        
         // Execute
+        Result = [[ODataRequestResult alloc] initWithConnection:Request];
+    }
+    // Insert or update (warning: update does not merge, but instead overwrites conflicts & defaults/nulls-out empty fields)
+    else if([Query ExecType] == oDataInterfaceExecType_Post || [Query ExecType] == oDataInterfaceExecType_Put)
+    {
+        // Inform the server the XML+Atom format we will be posting
+        [Request setValue:@"application/atom+xml" forHTTPHeaderField:@"content-type"];
+        
+        // The body of our message
+        NSMutableString* MessageBody = [[NSMutableString alloc] init];
+        [MessageBody appendFormat:
+            @"<?xml version=\"1.0\" encoding=\"utf-8\"?>"\
+            @"<entry xmlns:d=\"http://schemas.microsoft.com/ado/2007/08/dataservices\""\
+            @"  xmlns:m=\"http://schemas.microsoft.com/ado/2007/08/dataservices/metadata\""\
+            @"  xmlns=\"http://www.w3.org/2005/Atom\">"\
+            @"<title type=\"text\"></title>"\
+            @"<updated>%@</updated>"\
+            @"<author><name /></author>", [oDataParser oDataDateFormat:[NSDate date]]];
+        
+        // Define where we want to insert
+        [MessageBody appendFormat:@"<category term=\"%@.%@\" scheme=\"http://schemas.microsoft.com/ado/2007/08/dataservices/scheme\" />", [Query DatabaseName], [Query QueryEntryName]];
+        [MessageBody appendString:@"<content type=\"application/xml\">"];
+        [MessageBody appendString:@"<m:properties>"];
+        
+        // For each key-value pair...
+        for(id Key in [[Query QueryEntry] allKeys])
+        {
+            // Pull out value
+            id Value = [[Query QueryEntry] objectForKey:Key];
+            
+            // Print off properties as "<d:ID>10</d:ID>", but if we know a type...
+            
+            // Check for expected types...
+            if([Value isKindOfClass:[NSNumber class]])
+            {
+                // Get the type in question
+                CFNumberType NumberType = CFNumberGetType((__bridge CFNumberRef)((NSNumber*)Value));
+                switch(NumberType)
+                {
+                    case kCFNumberCharType:
+                    case kCFNumberSInt8Type:
+                        [MessageBody appendFormat:@"<d:%@ m:type=\"Edm.SByte\">%d</d:%@>", Key, [Value charValue], Key];
+                        break;
+                    case kCFNumberShortType:
+                    case kCFNumberSInt16Type:
+                        [MessageBody appendFormat:@"<d:%@ m:type=\"Edm.Int16\">%d</d:%@>", Key, [Value shortValue], Key];
+                        break;
+                    case kCFNumberIntType:
+                    case kCFNumberSInt32Type:
+                        [MessageBody appendFormat:@"<d:%@ m:type=\"Edm.Int32\">%d</d:%@>", Key, [Value intValue], Key];
+                        break;
+                    case kCFNumberLongType:
+                    case kCFNumberSInt64Type:
+                        [MessageBody appendFormat:@"<d:%@ m:type=\"Edm.Int64\">%lld</d:%@>", Key, [Value longLongValue], Key];
+                        break;
+                    case kCFNumberFloatType:
+                    case kCFNumberFloat32Type:
+                        [MessageBody appendFormat:@"<d:%@ m:type=\"Edm.Single\">%.7ff</d:%@>", Key, [Value floatValue], Key];
+                        break;
+                    case kCFNumberDoubleType:
+                    case kCFNumberFloat64Type:
+                        [MessageBody appendFormat:@"<d:%@ m:type=\"Edm.Double\">%.15lf</d:%@>", Key, [Value floatValue], Key];
+                        break;
+                    case kCFNumberLongLongType:
+                        break;
+                    default:
+                        NSLog(@"Warning: Unknown NSNumber type, unable to handle!");
+                        break;
+                }
+            }
+            else if([Value isKindOfClass:[NSDate class]])
+            {
+                [MessageBody appendFormat:@"<d:%@ m:type=\"Edm.DateTime\">%@</d:%@>", Key, [oDataParser oDataDateFormat:Value], Key];
+            }
+            // Else, we will just print off as a string litereal
+            else
+            {
+                [MessageBody appendFormat:@"<d:%@>%@</d:%@>", Key, Value, Key];
+            }
+        }
+        
+        // End of body
+        [MessageBody appendString:@"</m:properties>"];
+        [MessageBody appendString:@"</content></entry>"];
+        
+        // Execute with content
+        [Request setHTTPBody:[MessageBody dataUsingEncoding:NSUTF8StringEncoding]];
         Result = [[ODataRequestResult alloc] initWithConnection:Request];
     }
     
@@ -361,7 +443,7 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     }
     
     // All done!
-    NSDictionary* ParsedData = [Parser GetEntities];
+    NSArray* ParsedData = [Parser GetEntries];
     if(ParsedData == nil)
         *ErrorOut = NSErrorCreate(@"Unable to form the returned data");
     

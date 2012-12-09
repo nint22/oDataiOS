@@ -30,53 +30,42 @@ typedef enum __oDataInterfaceExecType {
 
 // Internal private class
 @interface __oDataQuery : NSObject
-    @property (atomic, readwrite) oDataInterfaceExecType ExecType;
-    @property (atomic, readwrite) NSURL* FullURL;
-    @property (atomic, readwrite) NSDictionary* QueryData;
+
+    // General service info
+    @property (atomic, readwrite) NSURL* ServerURL;                 // Base URL (such as http://www.9104data.com/Services/
+    @property (atomic, readwrite) NSString* ServiceName;            // Service name (such as CarData.scv)
+    @property (atomic, readwrite) NSString* DatabaseName;           // The database name associated with the service (such as RaceMotionData_01)
+    
+    // Current state / feature to execute
+    @property (atomic, readwrite) oDataInterfaceExecType ExecType;  // The type of command we want to execute (query, insert, update, delete)
+    @property (atomic, readwrite) NSString* CollectionName;         // The collection name we want to *query* through (such as Cars)
+    @property (atomic, readwrite) NSString* QueryString;            // The query string
+    @property (atomic, readwrite) NSString* QueryEntryName;         // The entry name type (such as Car in the collection named Cars)
+    @property (atomic, readwrite) NSDictionary* QueryEntry;         // The data-structure we will be inserting, updating, or deleting
+
 @end
 
 /*** Main Class Prototype ***/
 
 @interface oDataInterface : NSObject < NSURLConnectionDelegate >
 {
-    /*** Service URL ***/
-    
-    // Server URL (such as http://services.odata.org/OData )
-    NSURL* ServerURL;
-    
-    // Service path (such as OData.svc)
-    NSString* ServiceName;
-    
-    /*** Promises & Futures ***/
+    // Main / active state
+    __oDataQuery* ActiveQuery;
     
     // Queue of all promisies we will fulfill when the end-user tells us to
     // Is an array of "__oDataQuery" objects
     NSMutableArray* FuturesQueue;
-    
-    /*** Internal State Machine ***/
-    
-    // Current command type (query, insert, etc...)
-    oDataInterfaceExecType ExecType;
-    
-    // Current table (collection)
-    NSString* CollectionString;
-    
-    // Current query strings
-    NSString* QueryString;
 }
 
 /*** Creation & Settings ***/
 
 // Constructor
--(id)initInterfaceForServer:(NSURL*)ServerURL;
--(id)initInterfaceForServer:(NSURL*)ServerURL onService:(NSString*)Service;
+-(id)initInterfaceForServer:(NSURL*)ServerURL andDatabase:(NSString*)_Database;
+-(id)initInterfaceForServer:(NSURL*)ServerURL onService:(NSString*)Service andDatabase:(NSString*)_Database;
 
 // Static constructor
-+(id)oDataInterfaceForServer:(NSURL*)ServerURL;
-+(id)oDataInterfaceForServer:(NSURL*)ServerURL onService:(NSString*)Service;
-
-// Set the service (.svc) we will be executing upon (can be changed at any point)
--(void)SetService:(NSString*)Service;
++(id)oDataInterfaceForServer:(NSURL*)ServerURL andDatabase:(NSString*)_Database;
++(id)oDataInterfaceForServer:(NSURL*)ServerURL onService:(NSString*)Service andDatabase:(NSString*)_Database;
 
 // Get the full URL formed by the current state of this interface
 -(NSURL*)GetFullURL;
@@ -85,11 +74,11 @@ typedef enum __oDataInterfaceExecType {
 
 // Execute the current string formed (not the one on the promise queue)
 // Will block the calling thread's execution
--(NSDictionary*)Execute:(NSError**)ErrorOut;
+-(NSArray*)Execute:(NSError**)ErrorOut;
 
 // Execute with a callback block
 // Will not block, since the CompletionHandler function block is executed upon completion
--(void)ExecuteAsync:(void (^)(NSDictionary*, NSError*))CompletionHandler;
+-(void)ExecuteAsync:(void (^)(NSArray*, NSError*))CompletionHandler;
 
 /*** Futures & Promises Methods ***/
 
@@ -136,25 +125,25 @@ typedef enum __oDataInterfaceExecType {
 /*** Insert Data (POST) ***/
 
 // Insert data to the server
--(void)AddEntry:(NSDictionary*)NewEntry;
+-(void)AddEntry:(NSString*)Entry withData:(NSDictionary*)NewEntry;
 
 /*** Update Data (PUT) ***/
 
 // Update the given object
--(void)UpdateEntry:(NSDictionary*)ExistingEntry;
+-(void)UpdateEntry:(NSString*)Entry withData:(NSDictionary*)ExistingEntry;
 
 /*** Deletion (DELETE) ***/
 
 // Delete a given entry
--(void)DeleteEntry:(NSDictionary*)ExistingEntry;
+-(void)DeleteEntry:(NSString*)Entry withData:(NSDictionary*)ExistingEntry;
 
 /*** Special Execution (Functions that return OData info) ***/
 
 // Execute the given string against the set server and service
 // This is a blocking call; use the async version for non-block
--(NSDictionary*)ExecuteFuncString:(NSString*)FuncString WithError:(NSError**)ErrorOut;
+-(NSArray*)ExecuteFuncString:(NSString*)FuncString WithError:(NSError**)ErrorOut;
 
 // Non-blocking async. version of the string execution function
--(void)ExecuteFuncStringAsync:(NSString*)FuncString WithCompletionBlock:(void (^)(NSDictionary*, NSError*))CompletionHandler;
+-(void)ExecuteFuncStringAsync:(NSString*)FuncString WithCompletionBlock:(void (^)(NSArray*, NSError*))CompletionHandler;
 
 @end

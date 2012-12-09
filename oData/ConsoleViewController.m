@@ -54,6 +54,12 @@
     
     [self ConsolePrint:@"Executing tests..."];
     
+    // Overhead structures
+    NSError* ErrorOut = nil;
+    NSArray* Result = nil;
+    
+    #ifdef __SKIP__
+    
     /*** Test A ***/
     
     [self ConsolePrint:@"Testing reading from Northwind service..."];
@@ -63,8 +69,8 @@
     [InterfaceA SetCollection:@"Invoices"];
     
     // Query all (by giving no filter)
-    NSError* ErrorOut = nil;
-    NSDictionary* Result = [InterfaceA Execute:&ErrorOut];
+    ErrorOut = nil;
+    Result = [InterfaceA Execute:&ErrorOut];
     
     // Any errors?
     if(ErrorOut != nil)
@@ -77,15 +83,84 @@
     {
         [self ConsolePrint:@"FAILED: Unable to parse"];
     }
+    // No content?
+    else if([Result count] <= 0)
+    {
+        [self ConsolePrint:@"FAILED: Missing results"];
+    }
     // No error
     else
     {
-        [self ConsolePrint:@""];
+        [self ConsolePrint:[NSString stringWithFormat:@"PASSED: Printing off first element...\n%@", [Result objectAtIndex:0]]];
     }
     
     /*** Test B ***/
     
-    // Todo..
+    // Connect to example service
+    oDataInterface* InterfaceB = [oDataInterface oDataInterfaceForServer:[NSURL URLWithString:@"http://services.odata.org/Northwind/"] onService:@"Northwind.svc"];
+    [InterfaceB SetCollection:@"Products_by_Categories"];
+    
+    // Query all (by giving no filter)
+    ErrorOut = nil;
+    [InterfaceB AddTop:@"5"];
+    Result = [InterfaceB Execute:&ErrorOut];
+    
+    // Any errors?
+    if(ErrorOut != nil)
+    {
+        [self ConsolePrint:@"FAILED: Got an error"];
+        [self ConsolePrint:[ErrorOut description]];
+    }
+    // No results?
+    else if(Result == nil)
+    {
+        [self ConsolePrint:@"FAILED: Unable to parse"];
+    }
+    // No content?
+    else if([Result count] <= 0)
+    {
+        [self ConsolePrint:@"FAILED: Missing results"];
+    }
+    // No error
+    else
+    {
+        [self ConsolePrint:[NSString stringWithFormat:@"PASSED: Printing off first element...\n%@", [Result objectAtIndex:0]]];
+    }
+    
+    #endif
+    
+    /*** Test C ***/
+    
+    // Connect to example service
+    oDataInterface* InterfaceC = [oDataInterface oDataInterfaceForServer:[NSURL URLWithString:@"https://9104studiosdata.com/"] onService:@"RaceDataService.svc" andDatabase:@"recordmotion_db01RaceDataModel"];
+    [InterfaceC SetCollection:@"RM_Vehicle"];
+    
+    // Query all (by giving no filter)
+    ErrorOut = nil;
+    [InterfaceC AddEntry:@"RM_Vehicle" withData:[NSDictionary dictionaryWithObjectsAndKeys:@"aaaaaaaa-aaaa-aaaa-bbbb-123456789012", @"VehicleID", @"fd05df90-d151-40a7-8a0d-a1984d5f7beb", @"UserID", nil]];
+    Result = [InterfaceC Execute:&ErrorOut];
+    
+    // Any errors?
+    if(ErrorOut != nil)
+    {
+        [self ConsolePrint:@"FAILED: Got an error"];
+        [self ConsolePrint:[ErrorOut description]];
+    }
+    // No results?
+    else if(Result == nil)
+    {
+        [self ConsolePrint:@"FAILED: Unable to parse"];
+    }
+    // No content?
+    else if([Result count] <= 0)
+    {
+        [self ConsolePrint:@"FAILED: Missing results"];
+    }
+    // No error
+    else
+    {
+        [self ConsolePrint:[NSString stringWithFormat:@"PASSED: Printing off first element...\n%@", [Result objectAtIndex:0]]];
+    }
 }
 
 -(void)ConsolePrint:(NSString*)String

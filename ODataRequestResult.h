@@ -23,7 +23,7 @@
     NSURLConnection* Connection;
 }
 
-// Required initialization
+// Required initialization (gets)
 -(id) initWithConnection:(NSURLRequest*)_Request;
 
 // Execute the request synchronously
