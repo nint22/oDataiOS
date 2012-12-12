@@ -56,10 +56,16 @@ typedef enum __oDataParser_EdmType
     NSString* ElementName;
     NSString* ElementType;
     NSString* ElementString;
+    
+    // Any error we ever generate
+    NSError* ErrorOut;
 }
 
 // Init with XML-string data (i.e. HTTP result)
--(id) initWithData:(NSData*)Data;
+-(id)initWithData:(NSData*)Data;
+
+// Get any error
+-(NSError*)GetError;
 
 // Return the parsed data; on error, return nil, otherwise at minimum an empty dictionary is built
 -(NSArray*)GetEntries;

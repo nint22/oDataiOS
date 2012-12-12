@@ -13,23 +13,46 @@
 {
     if((self = [super init]) != nil)
     {
-        // Print in string format for debugging
-        NSLog(@"\n\n=== RESULT FROM SERVER ===\n\n%@", [[NSString alloc] initWithData:Data encoding:NSUTF8StringEncoding]);
+        // Default to no error at first
+        ErrorOut = nil;
         
         // Default parsing results
         Entries = [[NSMutableArray alloc] init];
         Entry = nil;
         
-        // Start XML parser
-        NSXMLParser* Parser = [[NSXMLParser alloc] initWithData:Data];
-        [Parser setDelegate:self];
-        bool Success = [Parser parse];
-        
-        // On failure, return nil
-        if(Success == false)
-            return nil;
+        // Completely skip if there is no data; it's all valid!
+        if([Data length] > 0)
+        {
+            // Interpret the data as a string (for the sake of testing for errors)
+            NSString* DataString = [[NSString alloc] initWithData:Data encoding:NSUTF8StringEncoding];
+            
+            // Error checking for any exceptions
+            if([DataString rangeOfString:@"<type>Microsoft.Data.OData.ODataException</type>"].length > 0)
+            {
+                NSString* ErrorMessage = [NSString stringWithFormat:@"Exception recieved from server: %@", DataString];
+                ErrorOut = NSErrorCreate(ErrorMessage);
+            }
+            
+            // Continue parsing normally
+            else
+            {
+                // Start XML parser
+                NSXMLParser* Parser = [[NSXMLParser alloc] initWithData:Data];
+                [Parser setDelegate:self];
+                bool Success = [Parser parse];
+                
+                // On failure, return nil
+                if(Success == false)
+                    ErrorOut = NSErrorCreate([[Parser parserError] localizedDescription]);
+            }
+        }
     }
     return self;
+}
+
+-(NSError*)GetError
+{
+    return ErrorOut;
 }
 
 -(NSArray*)GetEntries
@@ -154,10 +177,13 @@
                 case oDataParser_EdmType_Binary:
                 case oDataParser_EdmType_Byte:
                 {
+                    // Critical issue: the oData docs tell us that edm.byte is a hex value,
+                    // yet when we query the server, we are getting a decimal value
+                    // WORK-AROUND: Just parse as integer (todo: fix either server or whatever)
                     NSScanner* Scanner = [[NSScanner alloc] initWithString:ElementString];
-                    unsigned long long ScannedNumber; // Guaranteed to be 64-bit length
-                    [Scanner scanHexLongLong:&ScannedNumber];
-                    ElementObject = [NSNumber numberWithUnsignedLongLong:ScannedNumber];
+                    int ScannedNumber; // Guaranteed to be 64-bit length
+                    [Scanner scanInt:&ScannedNumber];
+                    ElementObject = [NSNumber numberWithInt:ScannedNumber];
                     break;
                 }
                 
@@ -189,10 +215,16 @@
             
             // Error check
             if(ElementObject == nil)
-                NSLog(@"Unable to parse element: [%@] \"%@\"", ElementType, ElementString);
+            {
+                NSString* ErrorMessage = [NSString stringWithFormat:@"Unable to parse element: [%@] \"%@\"", ElementType, ElementString];
+                ErrorOut = NSErrorCreate(ErrorMessage);
+            }
             
             // Save into dict. structure
-            [Entry setObject:ElementObject forKey:ElementName];
+            else
+            {
+                [Entry setObject:ElementObject forKey:ElementName];
+            }
         }
     }
 }
@@ -271,7 +303,7 @@
     NSDate* ParsedDate = nil;
     
     // Try three different versions
-    for(int i = 0; i < DateFormatsCount; i++)
+    for(int i = 0; i < DateFormatsCount && ParsedDate == nil; i++)
     {
         NSDateFormatter* DateFormatter = [[NSDateFormatter alloc] init];
         [DateFormatter setDateFormat:[NSString stringWithCString:DateFormatsCString[i] encoding:NSASCIIStringEncoding]];

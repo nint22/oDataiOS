@@ -32,17 +32,18 @@ typedef enum __oDataInterfaceExecType {
 @interface __oDataQuery : NSObject
 
     // General service info
-    @property (atomic, readwrite) NSURL* ServerURL;                 // Base URL (such as http://www.9104data.com/Services/
-    @property (atomic, readwrite) NSString* ServiceName;            // Service name (such as CarData.scv)
-    @property (atomic, readwrite) NSString* DatabaseName;           // The database name associated with the service (such as RaceMotionData_01)
+    @property (atomic, readwrite, retain) NSURL* ServerURL;                 // Base URL (such as http://www.9104data.com/Services/
+    @property (atomic, readwrite, retain) NSString* ServiceName;            // Service name (such as CarData.scv)
+    @property (atomic, readwrite, retain) NSString* DatabaseName;           // The database name associated with the service (such as RaceMotionData_01)
     
     // Current state / feature to execute
-    @property (atomic, readwrite) oDataInterfaceExecType ExecType;  // The type of command we want to execute (query, insert, update, delete)
-    @property (atomic, readwrite) NSString* CollectionName;         // The collection name we want to *query* through (such as Cars)
-    @property (atomic, readwrite) NSString* QueryString;            // The query string
-    @property (atomic, readwrite) NSString* QueryEntryName;         // The entry name type (such as Car in the collection named Cars)
-    @property (atomic, readwrite) NSDictionary* QueryEntry;         // The data-structure we will be inserting, updating, or deleting
-
+    @property (atomic, readwrite) oDataInterfaceExecType ExecType;          // The type of command we want to execute (query, insert, update, delete)
+    @property (atomic, readwrite, retain) NSString* CollectionName;         // The collection name we want to *query* through (such as Cars)
+    @property (atomic, readwrite, retain) NSString* QueryString;            // The query string
+    @property (atomic, readwrite, retain) NSString* QueryEntryName;         // The entry name type (such as Car in the collection named Cars)
+    @property (atomic, readwrite, retain) NSDictionary* QueryEntry;         // The data-structure we will be inserting, updating, or deleting
+    @property (atomic, readwrite, retain) NSString* EntryKeyID;             // The data-structures key; only used during entry-update
+    
 @end
 
 /*** Main Class Prototype ***/
@@ -60,15 +61,13 @@ typedef enum __oDataInterfaceExecType {
 /*** Creation & Settings ***/
 
 // Constructor
--(id)initInterfaceForServer:(NSURL*)ServerURL andDatabase:(NSString*)_Database;
 -(id)initInterfaceForServer:(NSURL*)ServerURL onService:(NSString*)Service andDatabase:(NSString*)_Database;
 
 // Static constructor
-+(id)oDataInterfaceForServer:(NSURL*)ServerURL andDatabase:(NSString*)_Database;
 +(id)oDataInterfaceForServer:(NSURL*)ServerURL onService:(NSString*)Service andDatabase:(NSString*)_Database;
 
-// Get the full URL formed by the current state of this interface
--(NSURL*)GetFullURL;
+// Clear / reset the internal state (i.e. any query we currently have setup)
+-(void)Clear;
 
 /*** Single Executions ***/
 
@@ -110,6 +109,9 @@ typedef enum __oDataInterfaceExecType {
 // Apply a "$skip" filter option
 -(void)AddSkip:(NSString*)Option;
 
+// Apply a "$filter" filter option
+-(void)AddFilter:(NSString*)Option;
+
 // Apply a "$expand" option
 -(void)AddExpand:(NSString*)Option;
 
@@ -130,7 +132,8 @@ typedef enum __oDataInterfaceExecType {
 /*** Update Data (PUT) ***/
 
 // Update the given object
--(void)UpdateEntry:(NSString*)Entry withData:(NSDictionary*)ExistingEntry;
+// Note that the key must be appropriatly typed by the user (i.e. if the key is a GUID, then the string must be in the form of "guid'000-00..00-000'")
+-(void)UpdateEntry:(NSString*)Entry withID:(NSString*)EntryKey withData:(NSDictionary*)ExistingEntry;
 
 /*** Deletion (DELETE) ***/
 

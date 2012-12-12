@@ -9,22 +9,17 @@
 
 /*** Internal Constants ***/
 
-static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic number)
+static const NSTimeInterval __oDataInterface_TimeOut = 8; // In seconds (Magic number)
 
 /*** Internal Structures ***/
 
 @implementation __oDataQuery
-    @synthesize ServerURL, ServiceName, DatabaseName, ExecType, CollectionName, QueryString, QueryEntryName, QueryEntry;
+    @synthesize ServerURL, ServiceName, DatabaseName, ExecType, CollectionName, QueryString, QueryEntryName, QueryEntry, EntryKeyID;
 @end
 
 @implementation oDataInterface
 
 /*** Public ***/
-
--(id)initInterfaceForServer:(NSURL*)_ServerURL andDatabase:(NSString*)_Database
-{
-    return [self initInterfaceForServer:_ServerURL onService:nil andDatabase:_Database];
-}
 
 -(id)initInterfaceForServer:(NSURL*)_ServerURL onService:(NSString*)_Service andDatabase:(NSString*)_Database
 {
@@ -38,14 +33,9 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
         [ActiveQuery setDatabaseName:_Database];
         
         // Clean state machine
-        [self ClearStates];
+        [self Clear];
     }
     return self;
-}
-
-+(id)oDataInterfaceForServer:(NSURL*)_ServerURL andDatabase:(NSString*)_Database
-{
-    return [[oDataInterface alloc] initInterfaceForServer:_ServerURL andDatabase:_Database];
 }
 
 +(id)oDataInterfaceForServer:(NSURL*)_ServerURL onService:(NSString*)_Service andDatabase:(NSString*)_Database
@@ -53,47 +43,10 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     return [[oDataInterface alloc] initInterfaceForServer:_ServerURL onService:_Service andDatabase:_Database];
 }
 
--(NSURL*)GetFullURL
-{
-    // Form the appropriate URL
-    NSURL* FullURL = nil;
-    
-    // Switch based on current state
-    switch([ActiveQuery ExecType])
-    {
-        case oDataInterfaceExecType_Get:
-            FullURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@%@", [[ActiveQuery ServerURL] absoluteString], [ActiveQuery ServiceName], [ActiveQuery CollectionName], [ActiveQuery QueryString] ? [NSString stringWithFormat:@"?%@", [ActiveQuery QueryString]] : @""]];
-            break;
-        case oDataInterfaceExecType_Post:
-        case oDataInterfaceExecType_Put:
-            FullURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@", [[ActiveQuery ServerURL] absoluteString], [ActiveQuery ServiceName], [ActiveQuery CollectionName]]];
-            break;
-        case oDataInterfaceExecType_Delete:
-            // todo.. implement the delete overhead structures
-            break;
-        default:
-            break;
-    }
-    
-    return FullURL;
-}
-
 -(NSArray*)Execute:(NSError**)ErrorOut
 {
-    // Form the appropriate URL
-    NSURL* FullURL = [self GetFullURL];
-    NSArray* Result = nil;
-    
-    // If not correctly formed, error out
-    if(FullURL == nil)
-        *ErrorOut = NSErrorCreate(@"Unable to form the appropriate URL for this command");
-    
-    // Else, all good!
-    else
-        Result = [oDataInterface ExecuteQuery:ActiveQuery OnError:ErrorOut];
-    
-    // Done
-    return Result;
+    // Pass active state to the core static function that does the heavy lifting
+    return [oDataInterface ExecuteQuery:ActiveQuery OnError:ErrorOut];
 }
 
 -(void)ExecuteAsync:(void (^)(NSArray*, NSError*))CompletionHandler
@@ -127,7 +80,7 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     
     // Save promise as a structure and clear the current state
     [FuturesQueue addObject:Promise];
-    [self ClearStates];
+    [self Clear];
 }
 
 -(NSArray*)ExecutePromises:(NSError**)ErrorOut
@@ -197,6 +150,11 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     [self QueryStringAppend:[NSString stringWithFormat:@"$skip=%@", Option]];
 }
 
+-(void)AddFilter:(NSString*)Option
+{
+    [self QueryStringAppend:[NSString stringWithFormat:@"$filter=%@", Option]];
+}
+
 -(void)AddExpand:(NSString*)Option
 {
     [self QueryStringAppend:[NSString stringWithFormat:@"$expand=%@", Option]];
@@ -226,9 +184,14 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     [ActiveQuery setQueryEntry: NewEntry];
 }
 
--(void)UpdateEntry:(NSString*)Entry withData:(NSDictionary*)ExistingEntry
+-(void)UpdateEntry:(NSString*)Entry withID:(NSString*)EntryKey withData:(NSDictionary*)ExistingEntry
 {
-    // TODO...
+    // Same as adding...
+    [ActiveQuery setExecType: oDataInterfaceExecType_Put];
+    [ActiveQuery setQueryString:[NSString stringWithFormat:@"%@/%@", [ActiveQuery ServiceName], [ActiveQuery CollectionName]]];
+    [ActiveQuery setQueryEntryName: Entry];
+    [ActiveQuery setQueryEntry: ExistingEntry];
+    [ActiveQuery setEntryKeyID:EntryKey];
 }
 
 -(void)DeleteEntry:(NSString*)Entry withData:(NSDictionary*)ExistingEntry
@@ -238,8 +201,8 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
 
 -(NSArray*)ExecuteFuncString:(NSString*)FuncString WithError:(NSError**)ErrorOut
 {
-    // Just form the service URL with the function
-    // Todo..
+    // Execute the function on the service, but that's it (nothing else)
+    [ActiveQuery setExecType:oDataInterfaceExecType_Get];
     [ActiveQuery setQueryString:[NSString stringWithFormat:@"%@/%@", [ActiveQuery ServiceName], FuncString]];
     return [oDataInterface ExecuteQuery:ActiveQuery OnError:ErrorOut];
 }
@@ -262,15 +225,41 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     }];
 }
 
-/*** Private ***/
-
--(void)ClearStates
+-(void)Clear
 {
     [ActiveQuery setExecType:oDataInterfaceExecType_Get];
     [ActiveQuery setCollectionName:nil];
     [ActiveQuery setQueryString:nil];
     [ActiveQuery setQueryEntryName:nil];
     [ActiveQuery setQueryEntry:nil];
+}
+
+/*** Private ***/
+
+// Get the full URL formed by the current state of this interface
++(NSURL*)GetFullURL:(__oDataQuery*)Query
+{
+    // Form the appropriate URL
+    NSString* FullURL = nil;
+    
+    // Switch based on current state
+    if([Query ExecType] == oDataInterfaceExecType_Get)
+    {
+        FullURL = [NSString stringWithFormat:@"%@/%@/%@", [[Query ServerURL] absoluteString], [Query ServiceName], [Query CollectionName]];
+        if([Query QueryString] != nil && [[Query QueryString] length] > 0)
+            FullURL = [NSString stringWithFormat:@"%@?%@", FullURL, [Query QueryString]];
+    }
+    else if([Query ExecType] == oDataInterfaceExecType_Post)
+    {
+        FullURL = [NSString stringWithFormat:@"%@/%@/%@", [[Query ServerURL] absoluteString], [Query ServiceName], [Query CollectionName]];
+    }
+    else if([Query ExecType] == oDataInterfaceExecType_Delete || [Query ExecType] == oDataInterfaceExecType_Put)
+    {
+        FullURL = [NSString stringWithFormat:@"%@/%@/%@(%@)", [[Query ServerURL] absoluteString], [Query ServiceName], [Query CollectionName], [Query EntryKeyID]];
+    }
+    
+    // Esacape-sequence and form URL
+    return [NSURL URLWithString:[FullURL stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 }
 
 -(void)QueryStringAppend:(NSString*)ToAppend
@@ -317,7 +306,15 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     [Request setValue:@"application/atom+xml" forHTTPHeaderField:@"accept"];
     
     // Form query URL
-    [Request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", [[Query ServerURL] absoluteString], [Query QueryString]]]];
+    NSURL* FullURL = [oDataInterface GetFullURL:Query];
+    
+    if(FullURL == nil)
+    {
+        *ErrorOut = NSErrorCreate(@"Unable to form the correct URL to execute");
+        return nil;
+    }
+    
+    [Request setURL:FullURL];
     
     // Prep for result
     ODataRequestResult* Result = nil;
@@ -436,9 +433,9 @@ static const NSTimeInterval __oDataInterface_TimeOut = 5; // In seconds (Magic n
     oDataParser* Parser = [[oDataParser alloc] initWithData:Data];
     
     // On failure, report last possible error
-    if(Parser == nil)
+    if([Parser GetError] != nil)
     {
-        *ErrorOut = NSErrorCreate(@"Unable to parse the returned data");
+        *ErrorOut = [Parser GetError];
         return nil;
     }
     

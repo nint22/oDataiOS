@@ -58,6 +58,7 @@
     NSError* ErrorOut = nil;
     NSArray* Result = nil;
     
+    // TODO: Update this to the latest interface standard
     #ifdef __SKIP__
     
     /*** Test A ***/
@@ -128,39 +129,6 @@
     }
     
     #endif
-    
-    /*** Test C ***/
-    
-    // Connect to example service
-    oDataInterface* InterfaceC = [oDataInterface oDataInterfaceForServer:[NSURL URLWithString:@"https://9104studiosdata.com/"] onService:@"RaceDataService.svc" andDatabase:@"recordmotion_db01RaceDataModel"];
-    [InterfaceC SetCollection:@"RM_Vehicle"];
-    
-    // Query all (by giving no filter)
-    ErrorOut = nil;
-    [InterfaceC AddEntry:@"RM_Vehicle" withData:[NSDictionary dictionaryWithObjectsAndKeys:@"aaaaaaaa-aaaa-aaaa-bbbb-123456789012", @"VehicleID", @"fd05df90-d151-40a7-8a0d-a1984d5f7beb", @"UserID", nil]];
-    Result = [InterfaceC Execute:&ErrorOut];
-    
-    // Any errors?
-    if(ErrorOut != nil)
-    {
-        [self ConsolePrint:@"FAILED: Got an error"];
-        [self ConsolePrint:[ErrorOut description]];
-    }
-    // No results?
-    else if(Result == nil)
-    {
-        [self ConsolePrint:@"FAILED: Unable to parse"];
-    }
-    // No content?
-    else if([Result count] <= 0)
-    {
-        [self ConsolePrint:@"FAILED: Missing results"];
-    }
-    // No error
-    else
-    {
-        [self ConsolePrint:[NSString stringWithFormat:@"PASSED: Printing off first element...\n%@", [Result objectAtIndex:0]]];
-    }
 }
 
 -(void)ConsolePrint:(NSString*)String
