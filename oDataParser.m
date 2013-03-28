@@ -27,7 +27,7 @@
             NSString* DataString = [[NSString alloc] initWithData:Data encoding:NSUTF8StringEncoding];
             
             // Error checking for any exceptions
-            if([DataString rangeOfString:@"<type>Microsoft.Data.OData.ODataException</type>"].length > 0)
+            if([DataString rangeOfString:@"<type>Microsoft.Data.OData.ODataException</type>"].location != NSNotFound)
             {
                 NSString* ErrorMessage = [NSString stringWithFormat:@"Exception recieved from server: %@", DataString];
                 ErrorOut = NSErrorCreate(ErrorMessage);

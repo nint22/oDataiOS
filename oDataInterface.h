@@ -61,9 +61,11 @@ typedef enum __oDataInterfaceExecType {
 /*** Creation & Settings ***/
 
 // Constructor
+-(id)initInterfaceForServer:(NSURL*)ServerURL andDatabase:(NSString*)_Database;
 -(id)initInterfaceForServer:(NSURL*)ServerURL onService:(NSString*)Service andDatabase:(NSString*)_Database;
 
 // Static constructor
++(id)oDataInterfaceForServer:(NSURL*)ServerURL andDatabase:(NSString*)_Database;
 +(id)oDataInterfaceForServer:(NSURL*)ServerURL onService:(NSString*)Service andDatabase:(NSString*)_Database;
 
 // Clear / reset the internal state (i.e. any query we currently have setup)

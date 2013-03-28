@@ -23,12 +23,37 @@
 
 -(NSData*) GetResult:(NSError**)ErrorOut
 {
-    // Reset error
+    // Reset error and results
     *ErrorOut = nil;
+    __block NSData* Data = nil;
+    __block NSURLResponse* Response = nil;
     
-    // Exec. request
-    NSURLResponse* Response = nil;
-    NSData* Data = [NSURLConnection sendSynchronousRequest:Request returningResponse:&Response error:ErrorOut];
+    // Old method (should be valid, but there is a server-side issue)
+    // Fundamental issue with iOS 6: http://stackoverflow.com/questions/12582849/nsurlconnectiondownloaddelegate-expectedtotalbytes-zero-in-ios-6
+    // And WinServer doesn't support: http://aspnetwebstack.codeplex.com/workitem/785
+    //NSData* Data = [NSURLConnection sendSynchronousRequest:Request returningResponse:&Response error:ErrorOut];
+    
+    // Create a working queue that runs in the background
+    NSOperationQueue* MyQueue = [[NSOperationQueue alloc] init];
+    
+    // Explicitly create a semaphore that we're going to wait on
+    dispatch_semaphore_t MySemaphore = dispatch_semaphore_create(0);
+    
+    // Updated method; should work for iOS 6
+    [NSURLConnection sendAsynchronousRequest:Request queue:MyQueue completionHandler:^(NSURLResponse* GivenResponse, NSData* GivenData, NSError* GivenError) {
+        
+        // Pass our data results...
+        *ErrorOut = GivenError;
+        Data = GivenData;
+        Response = GivenResponse;
+        
+        // Done with semaphore
+        dispatch_semaphore_signal(MySemaphore);
+    }];
+    
+    // Wait for our function to be called; this is guaranteed, even if it fails
+    dispatch_semaphore_wait(MySemaphore, DISPATCH_TIME_FOREVER);
+    //dispatch_release(MySemaphore);
     
     // On connection failure
     if(*ErrorOut != nil)

@@ -21,6 +21,11 @@ static const NSTimeInterval __oDataInterface_TimeOut = 8; // In seconds (Magic n
 
 /*** Public ***/
 
+-(id)initInterfaceForServer:(NSURL*)_ServerURL andDatabase:(NSString*)_Database
+{
+    return [self initInterfaceForServer:_ServerURL onService:nil andDatabase:_Database];
+}
+
 -(id)initInterfaceForServer:(NSURL*)_ServerURL onService:(NSString*)_Service andDatabase:(NSString*)_Database
 {
     // The true constructor for this entire class
@@ -36,6 +41,11 @@ static const NSTimeInterval __oDataInterface_TimeOut = 8; // In seconds (Magic n
         [self Clear];
     }
     return self;
+}
+
++(id)oDataInterfaceForServer:(NSURL*)_ServerURL andDatabase:(NSString*)_Database
+{
+    return [[oDataInterface alloc] initInterfaceForServer:_ServerURL andDatabase:_Database];
 }
 
 +(id)oDataInterfaceForServer:(NSURL*)_ServerURL onService:(NSString*)_Service andDatabase:(NSString*)_Database
@@ -304,6 +314,10 @@ static const NSTimeInterval __oDataInterface_TimeOut = 8; // In seconds (Magic n
     [Request setValue:@"1.0" forHTTPHeaderField:@"DataServiceVersion"];
     [Request setValue:@"2.0" forHTTPHeaderField:@"MaxDataServiceVersion"];
     [Request setValue:@"application/atom+xml" forHTTPHeaderField:@"accept"];
+    
+    // For iOS 6, do not allow caching
+    // Bug associated with http://stackoverflow.com/questions/12565740/nsurlconnection-timing-out-on-ios-6-but-not-on-ios-5
+    [Request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
     
     // Form query URL
     NSURL* FullURL = [oDataInterface GetFullURL:Query];
